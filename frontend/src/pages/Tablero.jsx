@@ -8,6 +8,8 @@ import {
   // API_URL, // <- descomentar al conectar la API
 } from "../data/demo.js";
 import AvisoFamilias from "../components/AvisoFamilias.jsx";
+import { usePlanes } from "../data/planes.js";
+import { salir } from "../data/sesion.js";
 
 // Píldora del semáforo. `color` es lo que manda la API: "verde" | "amarillo" | "rojo".
 export function Semaforo({ color, pm, big, prefijo }) {
@@ -122,6 +124,10 @@ export default function Tablero() {
   // Pronóstico de mañana -> GET /pronostico/manana
   const [pronostico, setPronostico] = useState(MOCK_PRONOSTICO);
 
+  // Planes de acción: el director solo ve cuántos hay por salón, nunca el detalle.
+  const planes = usePlanes();
+  const conPlan = (id) => planes.filter((p) => p.salonId === id).length;
+
   // Estado de la interfaz (no es mock): salón elegido en la tabla y envío del aviso.
   const [seleccionado, setSeleccionado] = useState("3B");
   const [envio, setEnvio] = useState("listo"); // "listo" | "enviando" | "enviado"
@@ -169,7 +175,7 @@ export default function Tablero() {
         </div>
         <div className="rg-dir__right">
           <span className="rg-muted">Vista del director · {escuela.momento}</span>
-          <a className="rg-pill rg-pill--blue rg-tap" href="#/maestro">Vista del maestro</a>
+          <button type="button" className="rg-pill rg-pill--blue rg-tap" onClick={salir}>Salir</button>
         </div>
         <div className={`rg-dir__today rg-aq-bg--${SEMAFORO[escuela.semaforoHoy]?.id}`}>
           <small>Semáforo de hoy</small>
@@ -184,7 +190,7 @@ export default function Tablero() {
           <div className="rg-table-wrap">
             <table className="rg-table rg-table--salones">
               <thead>
-                <tr><th>Grupo</th><th>Protección</th><th>Fuera</th><th>Dentro</th><th>%</th><th>Asma</th></tr>
+                <tr><th>Grupo</th><th>Protección</th><th>Fuera</th><th>Dentro</th><th>%</th><th>Asma</th><th>Con plan</th></tr>
               </thead>
               <tbody>
                 {salones.map((s) => {
@@ -210,13 +216,16 @@ export default function Tablero() {
                           <IconoPulmones />{s.asma}
                         </span>
                       </td>
+                      <td title="Planes de acción que llenaron las familias (solo el número)">{conPlan(s.id)}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
-          <p className="rg-muted">Toca un grupo para ver su gráfica. PM2.5 en µg/m³.</p>
+          <p className="rg-muted">
+            Toca un grupo para ver su gráfica. PM2.5 en µg/m³. "Con plan": planes de asma que llenaron las familias.
+          </p>
 
           {alertas.map((s) => (
             <p key={s.id} className="rg-warn" role="alert">

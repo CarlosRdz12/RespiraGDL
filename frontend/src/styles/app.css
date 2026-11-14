@@ -358,3 +358,28 @@ p { line-height: 1.6; }
   .rg-modal__body { padding: var(--rg-space-4) var(--rg-space-3); }
   .rg-textarea { min-height: 220px; }
 }
+
+/* Inicio de sesión (simulado) */
+.rg-login, .rg-plan-form { display: flex; flex-direction: column; gap: var(--rg-space-4); }
+.rg-plan-form > .rg-pill--blue { align-self: flex-start; }
+.rg-input {
+  width: 100%; min-height: 48px; padding: 0 var(--rg-space-3); border: 0; border-radius: var(--rg-r-pill);
+  background: var(--rg-mist); font: 500 1rem var(--rg-font); color: var(--rg-ink);
+}
+.rg-login__demo { border-radius: var(--rg-r-lg); padding: var(--rg-space-4); display: flex; flex-direction: column; gap: var(--rg-space-2); }
+.rg-login__demo p { font-size: var(--rg-fs-small); color: var(--rg-text); }
+.rg-login__demo b { font-weight: 700; margin-left: 4px; }
+
+/* Plan de asma de la familia */
+.rg-fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--rg-space-2); }
+.rg-fieldset legend { font-weight: 600; font-size: var(--rg-fs-small); color: var(--rg-ink); margin-bottom: var(--rg-space-2); padding: 0; }
+.rg-checks .is-on { background: var(--rg-mint); color: var(--rg-ink); font-weight: 500; }
+.rg-plans { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--rg-space-2); }
+.rg-plan { border-radius: var(--rg-r-lg); padding: var(--rg-space-3); display: flex; flex-direction: column; gap: 4px; font-size: 0.9375rem; color: var(--rg-text); }
+.rg-plan strong { color: var(--rg-ink); font-weight: 600; }
+.rg-plan__tag { align-self: flex-start; background: var(--rg-white); color: var(--rg-ink); font-size: 0.75rem; font-weight: 600; padding: 4px 12px; border-radius: var(--rg-r-pill); margin-bottom: 4px; }
+.rg-plan__acts { display: flex; gap: var(--rg-space-2); margin-top: var(--rg-space-2); }
+
+/* Vista de la maestra: ventanas modales de factores y expedientes */
+.rg-modal__count { font-weight: 600; color: var(--rg-ink); }
+.rg-plan--row { flex-direction: row; justify-content: space-between; align-items: center; gap: var(--rg-space-3); }
