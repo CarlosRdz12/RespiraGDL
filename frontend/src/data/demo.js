@@ -10,8 +10,7 @@ export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export const NORMA_PM25 = 45; // µg/m³ promedio 24 h, NOM-025-SSA1-2021
 
-// Colores del semáforo que manda la API ("verde" | "amarillo" | "rojo")
-// mapeados a las clases de tokens.css. Esto NO es mock, se queda.
+//
 export const SEMAFORO = {
   verde: { id: "good", nombre: "Verde" },
   amarillo: { id: "ok", nombre: "Amarillo" },
@@ -29,13 +28,13 @@ const NIVELES_PM25 = [
 ];
 export const nivelPm25 = (pm) => NIVELES_PM25.find((n) => pm <= n.max);
 
-// Por debajo de este % la barra de protección se pinta ámbar en vez de verde.
+// Por debajo de este % la barra de protección se pinta ámbar en vez de verd
 export const PROTECCION_BUENA = 50;
 
-// Por debajo de este % de protección el tablero muestra una alerta del salón.
+// Por debajo de este % de protección el tablero muestra una alerta del salón
 export const PROTECCION_MINIMA = 40;
 
-// Calcula % de protección = 1 − dentro/fuera. Si la API ya lo manda, no se usa.
+// Calcula % de protección = 1 − dentro/fuera. Si la API ya lo manda, no se usa
 export const proteccion = (fuera, dentro) => Math.round((1 - dentro / fuera) * 100);
 
 // ---------------------------------------------------------------------
