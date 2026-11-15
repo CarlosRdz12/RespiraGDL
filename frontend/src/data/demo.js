@@ -8,7 +8,7 @@
 // URL base de la API. Se configura con VITE_API_URL en frontend/.env.local
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-export const NORMA_PM25 = 45; // µg/m³ promedio 24 h, NOM-025-SSA1-2021
+export const NORMA_PM25 = 25; // µg/m³ promedio 24 h, NOM-025-SSA1-2021 (etapa vigente en 2026)
 
 //
 export const SEMAFORO = {
@@ -18,12 +18,13 @@ export const SEMAFORO = {
 };
 
 // Nivel de PM2.5 (µg/m³) -> clase del semáforo de tokens.css y palabra.
-// Esto NO es mock, se queda. Cortes aproximados al índice AIRE y SALUD; confirmar con Juan.
+// Esto NO es mock, se queda. Cortes de PM2.5 de la NOM-172-SEMARNAT-2023 (Índice AIRE y SALUD,
+// vigentes desde enero de 2026), iguales a backend/app/core/semaforo.py: si cambian, cambien ambos.
 const NIVELES_PM25 = [
-  { max: 25, id: "good", nombre: "Buena" },
-  { max: 45, id: "ok", nombre: "Aceptable" },
+  { max: 15, id: "good", nombre: "Buena" },
+  { max: 25, id: "ok", nombre: "Aceptable" },
   { max: 79, id: "bad", nombre: "Mala" },
-  { max: 147, id: "vbad", nombre: "Muy mala" },
+  { max: 130, id: "vbad", nombre: "Muy mala" },
   { max: Infinity, id: "ext", nombre: "Extremadamente mala" },
 ];
 export const nivelPm25 = (pm) => NIVELES_PM25.find((n) => pm <= n.max);
