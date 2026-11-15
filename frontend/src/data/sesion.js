@@ -14,6 +14,9 @@ export const ROLES = {
   familia: { nombre: "Familia del alumno", ruta: "/alumno" },
 };
 
+// Rol dueño de una ruta protegida ("/tablero" -> "director"); null si la ruta es pública.
+export const rolDeRuta = (path) => Object.keys(ROLES).find((r) => ROLES[r].ruta === path) ?? null;
+
 // Usuarios fáciles de la demo: usuario = contraseña. Una maestra por grupo (maestra1 = 1° A ... maestra6 = 6° B).
 export const MOCK_USUARIOS = [
   { usuario: "director", clave: "director", rol: "director" },

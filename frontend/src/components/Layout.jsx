@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { ROLES, salir } from "../data/sesion.js";
+import { ROUTES } from "../routes.js";
+import { ROLES, rolDeRuta, salir } from "../data/sesion.js";
 
 export function Logo({ big }) {
   return (
@@ -16,10 +17,10 @@ export function Logo({ big }) {
 export function Navbar({ route, sesion }) {
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [route]);
+  // Páginas públicas de routes.js; las protegidas por rol no salen en el menú.
+  const pages = ROUTES.filter((r) => r.nav && !rolDeRuta(r.path)).map((r) => [`#${r.path}`, r.nav]);
   const links = [
-    ["#/", "Inicio"],
-    ["#/#como", "Cómo funciona"],
-    ["#/#escuelas", "Escuelas"],
+    pages[0], ["#/#como", "Cómo funciona"], ...pages.slice(1),
     // Cada rol solo ve el enlace a su propia pantalla.
     sesion ? [`#${ROLES[sesion.rol].ruta}`, "Mi pantalla"] : ["#/entrar", "Entrar"],
   ];

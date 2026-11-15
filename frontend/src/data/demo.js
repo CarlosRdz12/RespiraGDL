@@ -46,7 +46,7 @@ export const MOCK_ESCUELA = {
   nombreCorto: "Esc. Prim. Miravalle",
   estacion: "SIMAJ Miravalle",
   semaforoHoy: "amarillo",
-  pm25Hoy: 58, // PM2.5 fuera (µg/m³) del sensor exterior; el semáforo siempre lleva número
+  pm25Hoy: 62, // PM2.5 fuera (µg/m³) del sensor exterior; el semáforo siempre lleva número
   actualizado: "10:00",
   // Texto fijo de la demo. Con la API: usar la hora del servidor o new Date().
   momento: "jueves 13:10",
@@ -56,18 +56,23 @@ export const MOCK_ESCUELA = {
 // ---------------------------------------------------------------------
 // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
 // Endpoint esperado: GET /salones
-// Forma esperada por fila: { id, grupo, fuera, dentro, proteccion, asma }
+// Forma esperada por fila: { id, grupo, fuera, dentro, proteccion, asma, filtro }
 // "asma" es solo un número: nunca nombres ni datos de alumnos.
+// Mismos salones que backend/scripts/cargar_demo.py y que SALONES de Aula Limpia:
+// 1A, 2A, 3A, 4B, 5A, 6B; 4B y 6B todavía no tienen filtro.
 // ---------------------------------------------------------------------
 export const MOCK_SALONES = [
-  { id: "1A", grupo: "1° A", fuera: 58, dentro: 19, asma: 4 },
-  { id: "2B", grupo: "2° B", fuera: 58, dentro: 21, asma: 3 },
-  { id: "3B", grupo: "3° B", fuera: 58, dentro: 20, asma: 5 },
-  { id: "4A", grupo: "4° A", fuera: 58, dentro: 22, asma: 2 },
-  { id: "5A", grupo: "5° A", fuera: 58, dentro: 41, asma: 3 },
-  { id: "6B", grupo: "6° B", fuera: 58, dentro: 23, asma: 1 },
+  { id: "1A", grupo: "1° A", fuera: 62, dentro: 21, asma: 3, filtro: true },
+  { id: "2A", grupo: "2° A", fuera: 62, dentro: 24, asma: 2, filtro: true },
+  { id: "3A", grupo: "3° A", fuera: 62, dentro: 19, asma: 4, filtro: true },
+  { id: "4B", grupo: "4° B", fuera: 62, dentro: 55, asma: 1, filtro: false },
+  { id: "5A", grupo: "5° A", fuera: 62, dentro: 23, asma: 2, filtro: true },
+  { id: "6B", grupo: "6° B", fuera: 62, dentro: 58, asma: 3, filtro: false },
 ].map((s) => ({ ...s, proteccion: proteccion(s.fuera, s.dentro) }));
 // --- FIN MOCK SALONES ---
+
+// Nombre que usa la página Aula Limpia (src/pages/AulaLimpia.jsx). Son los mismos salones.
+export const SALONES = MOCK_SALONES;
 
 // ---------------------------------------------------------------------
 // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
@@ -77,14 +82,14 @@ export const MOCK_SALONES = [
 // A las 10:00 (índice 3) los valores coinciden con la tabla de MOCK_SALONES.
 // ---------------------------------------------------------------------
 const MOCK_HORAS = ["7:00", "8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
-const MOCK_FUERA = [41, 49, 55, 58, 62, 60, 54, 49, 45, 43];
+const MOCK_FUERA = [44, 53, 59, 62, 66, 64, 58, 53, 48, 46];
 const MOCK_DENTRO_POR_SALON = {
-  "1A": [33, 26, 21, 19, 18, 18, 17, 16, 16, 15],
-  "2B": [34, 27, 23, 21, 20, 20, 19, 18, 17, 17],
-  "3B": [35, 28, 23, 20, 19, 19, 18, 17, 17, 16],
-  "4A": [36, 29, 24, 22, 21, 21, 20, 19, 18, 18],
-  "5A": [38, 40, 41, 41, 43, 42, 39, 36, 34, 33], // filtro apagado o puerta abierta: casi no protege
-  "6B": [36, 30, 25, 23, 22, 21, 20, 19, 19, 18],
+  "1A": [35, 28, 23, 21, 20, 20, 19, 18, 18, 17],
+  "2A": [37, 30, 26, 24, 23, 22, 21, 20, 19, 19],
+  "3A": [34, 27, 22, 19, 18, 18, 17, 16, 16, 15],
+  "4B": [40, 48, 53, 55, 59, 58, 52, 48, 43, 41], // sin filtro: dentro sigue casi igual que fuera
+  "5A": [36, 29, 25, 23, 22, 21, 20, 19, 19, 18],
+  "6B": [42, 50, 56, 58, 62, 60, 55, 50, 45, 43], // sin filtro
 };
 export const MOCK_LECTURAS = Object.fromEntries(
   Object.entries(MOCK_DENTRO_POR_SALON).map(([id, dentro]) => [
@@ -111,15 +116,15 @@ export const MOCK_PRONOSTICO = {
 
 // ---------------------------------------------------------------------
 // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-// Endpoint esperado: GET /salones/3B/hoy  (vista de la maestra)
+// Endpoint esperado: GET /salones/3A/hoy  (vista de la maestra)
 // ---------------------------------------------------------------------
 export const MOCK_MAESTRA = {
-  titulo: "Maestra 3° B",
-  salonId: "3B",
+  titulo: "Maestra 3° A",
+  salonId: "3A",
   semaforo: "amarillo",
-  pm25: 58, // PM2.5 fuera (µg/m³), el mismo del tablero; el semáforo siempre lleva número
+  pm25: 62, // PM2.5 fuera (µg/m³), el mismo del tablero; el semáforo siempre lleva número
   momento: "jueves 13:10", // texto fijo de la demo; con la API usar la hora real
-  conAsma: 5,
+  conAsma: 4,
   tareas: [
     { id: "recreo", texto: "Recreo adentro", hecho: false },
     { id: "filtro", texto: "Filtro encendido y puerta cerrada", hecho: false },

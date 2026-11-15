@@ -29,7 +29,7 @@ const PASOS_CRISIS = [
 
 export default function Maestro() {
   // Grupo de la maestra que inició sesión (maestra1 = 1° A ... maestra6 = 6° B).
-  const salonId = useSesion()?.salonId ?? "3B";
+  const salonId = useSesion()?.salonId ?? "3A";
 
   // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
   // Resumen del salón (semáforo y número de alumnos con asma) -> GET /salones/{salonId}/hoy

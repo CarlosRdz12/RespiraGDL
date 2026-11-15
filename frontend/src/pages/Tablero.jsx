@@ -11,9 +11,15 @@ import AvisoFamilias from "../components/AvisoFamilias.jsx";
 import { usePlanes } from "../data/planes.js";
 import { salir } from "../data/sesion.js";
 
+// Nivel de PM2.5 -> color del semáforo de la escuela, igual que backend/app/core/semaforo.py:
+// Buena o Aceptable = verde, Mala = amarillo, Muy mala o peor = rojo.
+const COLOR_POR_NIVEL = { good: "verde", ok: "verde", bad: "amarillo", vbad: "rojo", ext: "rojo" };
+
 // Píldora del semáforo. `color` es lo que manda la API: "verde" | "amarillo" | "rojo".
+// Si no llega color (p. ej. Aula Limpia solo pasa `pm`), se calcula con el PM2.5.
 export function Semaforo({ color, pm, big, prefijo }) {
-  const s = SEMAFORO[color] ?? SEMAFORO.amarillo;
+  const c = color ?? (pm != null ? COLOR_POR_NIVEL[nivelPm25(pm)?.id] : undefined);
+  const s = SEMAFORO[c] ?? SEMAFORO.amarillo;
   return (
     <span className={`rg-aq rg-aq--${s.id}${big ? " rg-aq--big" : ""}`}>
       <i aria-hidden="true" />
@@ -129,7 +135,7 @@ export default function Tablero() {
   const conPlan = (id) => planes.filter((p) => p.salonId === id).length;
 
   // Estado de la interfaz (no es mock): salón elegido en la tabla y envío del aviso.
-  const [seleccionado, setSeleccionado] = useState("3B");
+  const [seleccionado, setSeleccionado] = useState("3A");
   const [envio, setEnvio] = useState("listo"); // "listo" | "enviando" | "enviado"
   const timer = useRef();
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -230,8 +236,13 @@ export default function Tablero() {
           {alertas.map((s) => (
             <p key={s.id} className="rg-warn" role="alert">
               <IconoAviso />
-              <span><strong>{s.grupo}: protección baja ({s.proteccion} %).</strong>{" "}
-                Revisar que el filtro esté encendido y la puerta cerrada.</span>
+              {s.filtro === false ? (
+                <span><strong>{s.grupo}: sin filtro todavía (protección {s.proteccion} %).</strong>{" "}
+                  Prioridad para instalar uno.</span>
+              ) : (
+                <span><strong>{s.grupo}: protección baja ({s.proteccion} %).</strong>{" "}
+                  Revisar que el filtro esté encendido y la puerta cerrada.</span>
+              )}
             </p>
           ))}
         </section>

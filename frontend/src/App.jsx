@@ -1,20 +1,16 @@
 import { useEffect, useState } from "react";
 import { Navbar, Footer, useReveal } from "./components/Layout.jsx";
-import Landing from "./pages/Landing.jsx";
-import Tablero from "./pages/Tablero.jsx";
-import Maestro from "./pages/Maestro.jsx";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import { pageFor } from "./routes.js";
 import Alumno from "./pages/Alumno.jsx";
 import Entrar from "./pages/Entrar.jsx";
-import { ROLES, useSesion } from "./data/sesion.js";
+import { ROLES, rolDeRuta, useSesion } from "./data/sesion.js";
 
-// Pantallas protegidas: cada una solo la ve su rol. La landing y #/entrar son públicas.
-const PROTEGIDAS = {
-  "/tablero": { rol: "director", Page: Tablero },
-  "/maestro": { rol: "maestra", Page: Maestro },
-  "/alumno": { rol: "familia", Page: Alumno },
-};
+// Páginas del acceso por rol que no están en routes.js. El resto sale de routes.js (pageFor).
+const PAGINAS_ACCESO = { "/alumno": Alumno, "/entrar": Entrar };
 
-// Rutas con hash para que funcione en GitHub Pages sin servidor: #/, #/tablero, #/maestro, #/#seccion
+// Rutas con hash para que funcione en GitHub Pages sin servidor: #/, #/aula, #/tablero, #/maestro, #/#seccion.
+// Para agregar una página, regístrala en routes.js.
 function parse() {
   const raw = window.location.hash.replace(/^#/, "") || "/";
   const [path, anchor] = raw.split("#");
@@ -28,8 +24,8 @@ export default function App() {
   const sesion = useSesion();
 
   // Sin sesión -> #/entrar. Con sesión de otro rol -> a su propia pantalla.
-  const protegida = PROTEGIDAS[path];
-  const destino = protegida && protegida.rol !== sesion?.rol
+  const rol = rolDeRuta(path); // null si la página es pública
+  const destino = rol && rol !== sesion?.rol
     ? (sesion ? ROLES[sesion.rol].ruta : "/entrar")
     : null;
   useEffect(() => {
@@ -48,11 +44,13 @@ export default function App() {
   useReveal(path);
 
   // Mientras redirige no se pinta la pantalla protegida ni un instante.
-  const Page = destino ? Vacio : protegida ? protegida.Page : path === "/entrar" ? Entrar : Landing;
+  const Page = destino ? Vacio : PAGINAS_ACCESO[path] ?? pageFor(path);
   return (
     <>
       <Navbar route={path} sesion={sesion} />
-      <Page />
+      <ErrorBoundary resetKey={path}>
+        <Page />
+      </ErrorBoundary>
       <Footer />
     </>
   );

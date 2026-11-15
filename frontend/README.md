@@ -19,7 +19,7 @@ Cada rol solo entra a su pantalla; si abre otra, lo regresa a la suya. La landin
 | Usuario | Contraseña | Pantalla |
 | --- | --- | --- |
 | `director` | `director` | `#/tablero` (ve cuántos planes hay por salón, solo el número) |
-| `maestra1` … `maestra6` | igual al usuario | `#/maestro` de su grupo: 1° A, 2° B, 3° B, 4° A, 5° A, 6° B. Ve sus factores a cuidar y sus expedientes (sin identificar) en ventanas modales |
+| `maestra1` … `maestra6` | igual al usuario | `#/maestro` de su grupo: 1° A, 2° A, 3° A, 4° B, 5° A, 6° B. Ve sus factores a cuidar y sus expedientes (sin identificar) en ventanas modales |
 | `familia` | `familia` | `#/alumno` |
 
 **No es seguridad real:** la página está en GitHub Pages y los usuarios están en `src/data/sesion.js`. El acceso real lo dará la API (`TODO: CONECTAR A LA API`). Los planes que captura la familia se guardan solo en el `localStorage` de ese navegador; los simulados están en `src/data/planes.js`.
@@ -35,7 +35,7 @@ npm run build    # genera dist/
 
 ## Datos
 
-Todo sale de `src/data/demo.js` y **es simulado**. Busquen `TODO: CONECTAR A LA API`: cada `useState` arranca con un `MOCK_*` y cada página trae un `useEffect` con el `fetch` comentado (`/salones`, `/lecturas`, `/pronostico/manana`, `/salones/3B/hoy`). Para conectar: descomenten el fetch, borren el bloque `MOCK_*` y pongan la URL en `frontend/.env.local` como `VITE_API_URL=...`.
+Todo sale de `src/data/demo.js` y **es simulado**. Busquen `TODO: CONECTAR A LA API`: cada `useState` arranca con un `MOCK_*` y cada página trae un `useEffect` con el `fetch` comentado (`/salones`, `/lecturas`, `/pronostico/manana`, `/salones/3A/hoy`). Para conectar: descomenten el fetch, borren el bloque `MOCK_*` y pongan la URL en `frontend/.env.local` como `VITE_API_URL=...`.
 
 ## Diseño
 

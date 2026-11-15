@@ -35,10 +35,10 @@ export const GRUPOS = MOCK_SALONES.map((s) => ({ id: s.id, nombre: s.grupo }));
 export const MOCK_PLANES = [
   { id: "m1", salonId: "1A", inhalador: true, detonantes: ["polvo"], avisar: "mama" },
   { id: "m2", salonId: "1A", inhalador: true, detonantes: ["frio", "ejercicio"], avisar: "papa" },
-  { id: "m3", salonId: "2B", inhalador: false, detonantes: ["polen"], avisar: "mama" },
-  { id: "m4", salonId: "3B", inhalador: true, detonantes: ["frio", "polvo"], avisar: "mama" },
-  { id: "m5", salonId: "3B", inhalador: true, detonantes: ["humo"], avisar: "tutor" },
-  { id: "m6", salonId: "3B", inhalador: false, detonantes: ["ejercicio", "clima"], avisar: "papa" },
+  { id: "m3", salonId: "2A", inhalador: false, detonantes: ["polen"], avisar: "mama" },
+  { id: "m4", salonId: "3A", inhalador: true, detonantes: ["frio", "polvo"], avisar: "mama" },
+  { id: "m5", salonId: "3A", inhalador: true, detonantes: ["humo"], avisar: "tutor" },
+  { id: "m6", salonId: "3A", inhalador: false, detonantes: ["ejercicio", "clima"], avisar: "papa" },
   { id: "m7", salonId: "5A", inhalador: true, detonantes: ["humo", "polvo"], avisar: "mama" },
 ];
 // --- FIN MOCK PLANES ---
