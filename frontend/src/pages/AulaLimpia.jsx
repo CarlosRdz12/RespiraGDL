@@ -16,7 +16,7 @@ export default function AulaLimpia() {
       </div>
       <div className="rg-grid3">
         {SALONES.map((s) => (
-          <div key={s.id} className="rg-panel rg-surface-mint">
+          <div key={s.id} className={`rg-panel ${s.filtro ? "rg-surface-mint" : "rg-surface-mist"}`}>
             <div className="rg-panel__head">
               <h2>Salón {s.id}</h2>
               <Semaforo pm={s.dentro} />

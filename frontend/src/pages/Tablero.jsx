@@ -181,6 +181,7 @@ export default function Tablero() {
         </div>
         <div className="rg-dir__right">
           <span className="rg-muted">Vista del director · {escuela.momento}</span>
+          <a className="rg-pill rg-tap" href="#/aula">Ver Aula Limpia</a>
           <button type="button" className="rg-pill rg-pill--blue rg-tap" onClick={salir}>Salir</button>
         </div>
         <div className={`rg-dir__today rg-aq-bg--${SEMAFORO[escuela.semaforoHoy]?.id}`}>

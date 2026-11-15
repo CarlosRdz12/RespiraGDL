@@ -18,7 +18,7 @@ Cada rol solo entra a su pantalla; si abre otra, lo regresa a la suya. La landin
 
 | Usuario | Contraseña | Pantalla |
 | --- | --- | --- |
-| `director` | `director` | `#/tablero` (ve cuántos planes hay por salón, solo el número) |
+| `director` | `director` | `#/aula` al entrar, con botón a `#/tablero` y de regreso (ve cuántos planes hay por salón, solo el número) |
 | `maestra1` … `maestra6` | igual al usuario | `#/maestro` de su grupo: 1° A, 2° A, 3° A, 4° B, 5° A, 6° B. Ve sus factores a cuidar y sus expedientes (sin identificar) en ventanas modales |
 | `familia` | `familia` | `#/alumno` |
 

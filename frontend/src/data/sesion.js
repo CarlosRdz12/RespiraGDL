@@ -8,14 +8,15 @@
 import { useEffect, useState } from "react";
 import { MOCK_SALONES } from "./demo.js";
 
+// ruta = pantalla a la que llega al entrar; rutas = todas las pantallas que solo ve ese rol.
 export const ROLES = {
-  director: { nombre: "Director", ruta: "/tablero" },
-  maestra: { nombre: "Maestra", ruta: "/maestro" },
-  familia: { nombre: "Familia del alumno", ruta: "/alumno" },
+  director: { nombre: "Director", ruta: "/aula", rutas: ["/aula", "/tablero"] },
+  maestra: { nombre: "Maestra", ruta: "/maestro", rutas: ["/maestro"] },
+  familia: { nombre: "Familia del alumno", ruta: "/alumno", rutas: ["/alumno"] },
 };
 
 // Rol dueño de una ruta protegida ("/tablero" -> "director"); null si la ruta es pública.
-export const rolDeRuta = (path) => Object.keys(ROLES).find((r) => ROLES[r].ruta === path) ?? null;
+export const rolDeRuta = (path) => Object.keys(ROLES).find((r) => ROLES[r].rutas.includes(path)) ?? null;
 
 // Usuarios fáciles de la demo: usuario = contraseña. Una maestra por grupo (maestra1 = 1° A ... maestra6 = 6° B).
 export const MOCK_USUARIOS = [
