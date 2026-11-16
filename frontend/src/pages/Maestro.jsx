@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SEMAFORO } from "../data/demo.js";
 import TarjetaModal from "../components/TarjetaModal.jsx";
 import NotaDatos from "../components/NotaDatos.jsx";
-import { apiAvisos, useConexionApi } from "../data/useAvisos.js";
+import { apiAvisos, horaActual, useConexionApi } from "../data/useAvisos.js";
 import { useMaestraDatos } from "../data/useDatos.js";
 import { Semaforo } from "./Tablero.jsx";
 import { ResumenPlan } from "./Alumno.jsx";
@@ -22,7 +22,7 @@ const alumnos = (n) => `${n} ${n === 1 ? "alumno" : "alumnos"}`;
 // Debe validarla un médico y siempre manda el plan de acción de cada alumno.
 // (Texto fijo del frontend, no viene de la API.)
 const PASOS_CRISIS = [
-  "Siéntalo derecho, quédate con él y háblale con calma.",
+  "Siéntalo derecho y llévalo a un lugar sin humo ni polvo. Quédate con él y háblale con calma.",
   "Ayúdalo a usar su inhalador de rescate como indica su plan de acción.",
   "Espera unos minutos. Si no mejora, repite como indica su plan y avisa a la dirección.",
   "Si le cuesta hablar, tiene los labios azulados o no mejora, llama al 911 y avisa a su familia.",
@@ -38,8 +38,13 @@ export default function Maestro() {
   const { salon, origen, marcar, errorTarea } = useMaestraDatos(modoApi, salonId);
   const tareas = salon.tareas;
 
-  // Estado de la interfaz (no es mock): muestra u oculta la guía de crisis.
+  // Estado de la interfaz (no es mock): guía de crisis y aviso a la familia.
   const [crisis, setCrisis] = useState(false);
+  // Aviso a la familia en una crisis: SIMULADO. Avisar a una familia exige saber qué alumno es, y el
+  // sistema no guarda nombres; está pendiente de definir con backend y con Damaris.
+  const [avisoFamilia, setAvisoFamilia] = useState(null);
+  const avisarFamilia = () => setAvisoFamilia(horaActual());
+  const salirDeCrisis = () => { setCrisis(false); setAvisoFamilia(null); };
 
   // Planes de acción del grupo, sin datos que identifiquen al alumno (simulados + capturados en este navegador).
   const planes = usePlanes(salon.salonId);
@@ -122,7 +127,7 @@ export default function Maestro() {
           </>
         ) : (
           <>
-            <button className="rg-pill rg-pill--blue rg-tap" onClick={() => setCrisis(false)}>← Volver</button>
+            <button className="rg-pill rg-pill--blue rg-tap" onClick={salirDeCrisis}>← Volver</button>
             <h1>Guía de crisis</h1>
             <ol className="rg-steps">
               {PASOS_CRISIS.map((p, i) => (
@@ -133,7 +138,19 @@ export default function Maestro() {
               ))}
             </ol>
             <a className="rg-pill rg-pill--danger rg-full rg-sos" href="tel:911">Llamar al 911</a>
-            <p className="rg-muted">Guía general de ejemplo. Siempre sigue el plan de acción del alumno.</p>
+            <button type="button" className="rg-pill rg-pill--primary rg-full rg-tap"
+              onClick={avisarFamilia} disabled={avisoFamilia !== null}>
+              {avisoFamilia ? "Familia avisada" : "Avisar a la familia"}
+            </button>
+            <div aria-live="polite">
+              {avisoFamilia && (
+                <p className="rg-sent">✓ Se avisó a la familia a las {avisoFamilia} (simulado).</p>
+              )}
+            </div>
+            <p className="rg-muted">
+              Guía general de ejemplo. Siempre sigue el plan de acción del alumno. Respira GDL orienta y alerta;
+              no diagnostica ni sustituye la atención médica.
+            </p>
           </>
         )}
       </div>
