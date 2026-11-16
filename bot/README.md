@@ -21,7 +21,7 @@ Para el pronóstico real, levanten también la API de Juan (`backend/README.md`)
 
 | Mensaje | Respuesta |
 | --- | --- |
-| `/start` | Registra a la familia y le pide, con botones, los grupos de sus hijos (puede marcar varios). No pide nombres |
+| `/start` o `/alta` | Registra a la familia y le pide, con botones, los grupos de sus hijos (puede marcar varios). No pide nombres |
 | `/grupos` | Cambia los grupos |
 | `/manana` | Pronóstico de mañana solo a quien lo pide |
 | `/simular` | Simula el aviso a **toda la escuela** con el pronóstico actual |
@@ -29,7 +29,7 @@ Para el pronóstico real, levanten también la API de Juan (`backend/README.md`)
 | `/simular 3A` · `/simular amarillo 3A` | Simula el aviso solo a las familias de ese grupo, como lo haría la maestra |
 | `/hora` · `/hora 06:30` | Muestra o cambia la hora del aviso automático (hora de Guadalajara). El cambio también se guarda en el tablero |
 | `/salir` | Deja de recibir avisos y borra los datos de la familia |
-| `1` | Registra que un niño tuvo síntomas hoy (solo cuenta, sin nombres) |
+| `1` | Registra que un niño tuvo síntomas hoy (anónimo: solo se cuenta) y responde "Gracias. Esto ayuda a medir si el proyecto funciona." |
 
 Grupos: 1A, 2A, 3A, 4B, 5A, 6B (los mismos del frontend y del backend).
 

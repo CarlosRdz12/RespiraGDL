@@ -1,7 +1,7 @@
 """Bot de Telegram de Respira GDL: avisos de calidad del aire para familias de alumnos con asma.
 
 Comandos:
-  /start            registra a la familia y le pide los grupos de sus hijos (sin nombres)
+  /start  o  /alta  registra a la familia y le pide los grupos de sus hijos (sin nombres)
   /grupos           cambia los grupos (puede marcar varios: hermanos en otros grupos)
   /manana           muestra el pronóstico de mañana (semáforo + PM2.5) solo a quien lo pide
   /simular [color] [grupo]
@@ -43,6 +43,8 @@ TOKEN = os.getenv("TELEGRAM_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN")
 API_URL = os.getenv("API_URL", "http://localhost:8000").rstrip("/")
 ESCUELA_ID = os.getenv("ESCUELA_ID", "miravalle")
 ESCUELA_NOMBRE = os.getenv("ESCUELA_NOMBRE", "Esc. Prim. Miravalle T/M")
+# Zona de la estación de referencia que sale en el aviso ("PM2.5 esperado en Miravalle").
+ZONA = os.getenv("ZONA", "Miravalle")
 INTERVALO_AVISOS = int(os.getenv("INTERVALO_AVISOS", "30"))
 # Aquí se guardan las familias (solo chat de Telegram y grupos). Está en .gitignore: nunca se sube.
 DATOS_PATH = Path(os.getenv("DATOS_PATH", str(Path(__file__).with_name("datos") / "familias.json")))
@@ -79,13 +81,23 @@ def nivel(pm25: float) -> tuple[str, str]:
 
 
 ICONO = {"verde": "🟢", "amarillo": "🟡", "rojo": "🔴"}
-# Mismo texto que frontend/src/data/avisos.js.
+# Recordatorios del aviso según el semáforo. Mismo texto que frontend/src/data/avisos.js.
+# Siempre van el inhalador y el medicamento de control; el recreo cambia con el color.
 CONSEJO = {
-    "verde": "Recreo normal al aire libre.",
-    "amarillo": "Si su hijo o hija tiene asma, revise que lleve su inhalador y su plan de acción.",
+    "verde": (
+        "• Recreo normal al aire libre.\n"
+        "• Que lleve su inhalador de rescate.\n"
+        "• No suspenda su medicamento de control."
+    ),
+    "amarillo": (
+        "• Que lleve su inhalador de rescate.\n"
+        "• El recreo será adentro para los niños con asma.\n"
+        "• No suspenda su medicamento de control."
+    ),
     "rojo": (
-        "El recreo y la educación física serán adentro. "
-        "Revise que lleve su inhalador y su plan de acción."
+        "• Que lleve su inhalador de rescate.\n"
+        "• El recreo y la educación física serán adentro.\n"
+        "• No suspenda su medicamento de control."
     ),
 }
 
@@ -206,10 +218,10 @@ def mensaje_aviso(p: dict, mensaje_escuela: str | None = None) -> str:
     texto = (
         f"Aviso de Respira GDL · {ESCUELA_NOMBRE}\n\n"
         f"{ICONO.get(color, '')} Pronóstico para mañana: {color.upper()}\n"
-        f"PM2.5 esperado: {p['pm25']} µg/m³ (calidad del aire {p['nivel'].lower()})\n\n"
+        f"PM2.5 esperado en {ZONA}: {p['pm25']} µg/m³ (calidad del aire {p['nivel'].lower()})\n\n"
         f"{CONSEJO.get(color, '')}\n\n"
         f"{escuela}"
-        "Si su hijo o hija tuvo tos, silbido en el pecho o le faltó el aire hoy, responda 1.\n"
+        "Responda 1 si su hijo o hija tuvo síntomas hoy (anónimo).\n"
         "Esto no es un diagnóstico; ante cualquier duda consulte a su médico."
     )
     if p.get("simulado"):
@@ -350,9 +362,8 @@ async def responder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         guardar_datos(DATOS)
         log.info("Reporte de síntomas recibido (total hoy: %s)", DATOS["reportes"][hoy])
         await update.message.reply_text(
-            "Gracias, quedó registrado. La escuela verá cuántos niños tuvieron síntomas hoy, "
-            "sin nombres.\n\nSi le cuesta hablar, tiene los labios azulados o no mejora con "
-            "su inhalador, llame al 911."
+            "Gracias. Esto ayuda a medir si el proyecto funciona.\n\n"
+            "Si le cuesta hablar, tiene los labios azulados o no mejora con su inhalador, llame al 911."
         )
         # Solo el conteo para el tablero. El grupo va solo si la familia tiene uno; con hermanos en
         # varios grupos no se sabe cuál, y se cuenta para la escuela.
@@ -363,7 +374,7 @@ async def responder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await llamar_api(cliente(context), "POST", "/reportes-sintomas", json=cuerpo)
     else:
         await update.message.reply_text(
-            "Responda 1 si su hijo o hija tuvo síntomas hoy, o escriba /manana para ver el pronóstico."
+            "Responda 1 si su hijo o hija tuvo síntomas hoy (anónimo), o escriba /manana para ver el pronóstico."
         )
 
 
@@ -550,7 +561,7 @@ def main() -> None:
     if not TOKEN:
         raise SystemExit("Falta TELEGRAM_TOKEN. Copie bot/.env.example a bot/.env y ponga el token de @BotFather.")
     app = Application.builder().token(TOKEN).post_init(al_iniciar).post_shutdown(al_cerrar).build()
-    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler(["start", "alta"], start))  # /alta, como pide el issue #10
     app.add_handler(CommandHandler("grupos", grupos))
     app.add_handler(CommandHandler("manana", manana))
     app.add_handler(CommandHandler("simular", simular))
