@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ROUTES } from "../routes.js";
+import { ROLES, rolDeRuta, salir } from "../data/sesion.js";
 
 export function Logo({ big }) {
   return (
@@ -13,11 +14,16 @@ export function Logo({ big }) {
   );
 }
 
-export function Navbar({ route }) {
+export function Navbar({ route, sesion }) {
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [route]);
-  const pages = ROUTES.filter((r) => r.nav).map((r) => [`#${r.path}`, r.nav]);
-  const links = [pages[0], ["#/#como", "Cómo funciona"], ...pages.slice(1)];
+  // Páginas públicas de routes.js; las protegidas por rol no salen en el menú.
+  const pages = ROUTES.filter((r) => r.nav && !rolDeRuta(r.path)).map((r) => [`#${r.path}`, r.nav]);
+  const links = [
+    pages[0], ["#/#como", "Cómo funciona"], ...pages.slice(1),
+    // Cada rol solo ve el enlace a su propia pantalla.
+    sesion ? [`#${ROLES[sesion.rol].ruta}`, "Mi pantalla"] : ["#/entrar", "Entrar"],
+  ];
   return (
     <header className="rg-nav">
       <Logo />
@@ -32,7 +38,11 @@ export function Navbar({ route }) {
           );
         })}
         <div className="rg-nav__ctas">
-          <a className="rg-pill" href="#/tablero">Ver tablero</a>
+          {sesion ? (
+            <button type="button" className="rg-pill" onClick={salir}>Salir</button>
+          ) : (
+            <a className="rg-pill" href="#/entrar">Entrar</a>
+          )}
           <a className="rg-pill rg-pill--blue" href="#/#unete">Unir mi escuela</a>
         </div>
       </nav>
@@ -72,7 +82,8 @@ export function Footer() {
       </div>
       <div className="rg-footer__bar">
         <span>© 2026 Equipo Respira GDL · Sergio, Juan, Carlos y Damaris</span>
-        <span>Datos de la demo simulados</span>
+        {/* Cada pantalla dice arriba si sus datos son de la API o simulados (NotaDatos). */}
+        <span>Cada pantalla indica si sus datos son simulados</span>
       </div>
     </footer>
   );
