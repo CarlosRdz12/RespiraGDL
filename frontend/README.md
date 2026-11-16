@@ -55,7 +55,7 @@ La URL de la API va en `frontend/.env.local` como `VITE_API_URL=...` (ver `front
 | ¿Lecturas simuladas? | `GET /lecturas/nodos` (campo `simulada`) |
 | Vista de la maestra | `GET /salones/{id}/hoy`; "Qué hacer hoy" se guarda con `POST /salones/{id}/tareas/{tarea}` |
 
-Sin dato de un sensor, la tabla muestra "—" en vez de un número. **Simulado aunque haya API:** el botón "Avisar a la familia" de la guía de crisis (avisar a una familia exige saber qué alumno es y el sistema no guarda nombres; pendiente de definir con backend), el acceso por rol y los planes de asma de las familias.
+Sin dato de un sensor, la tabla muestra "—" en vez de un número. **Simulado aunque haya API:** el acceso por rol y los planes de asma de las familias. La guía de crisis no avisa sola a la familia (el sistema no guarda qué familia es de qué alumno): le indica a la maestra que llame al teléfono que ya tiene registrado la escuela.
 
 ### Aviso a familias (ya conectado)
 

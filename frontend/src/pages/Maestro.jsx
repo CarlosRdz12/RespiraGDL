@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SEMAFORO } from "../data/demo.js";
 import TarjetaModal from "../components/TarjetaModal.jsx";
 import NotaDatos from "../components/NotaDatos.jsx";
-import { apiAvisos, horaActual, useConexionApi } from "../data/useAvisos.js";
+import { apiAvisos, useConexionApi } from "../data/useAvisos.js";
 import { useMaestraDatos } from "../data/useDatos.js";
 import { Semaforo } from "./Tablero.jsx";
 import { ResumenPlan } from "./Alumno.jsx";
@@ -38,13 +38,8 @@ export default function Maestro() {
   const { salon, origen, marcar, errorTarea } = useMaestraDatos(modoApi, salonId);
   const tareas = salon.tareas;
 
-  // Estado de la interfaz (no es mock): guía de crisis y aviso a la familia.
+  // Estado de la interfaz (no es mock): muestra u oculta la guía de crisis.
   const [crisis, setCrisis] = useState(false);
-  // Aviso a la familia en una crisis: SIMULADO. Avisar a una familia exige saber qué alumno es, y el
-  // sistema no guarda nombres; está pendiente de definir con backend y con Damaris.
-  const [avisoFamilia, setAvisoFamilia] = useState(null);
-  const avisarFamilia = () => setAvisoFamilia(horaActual());
-  const salirDeCrisis = () => { setCrisis(false); setAvisoFamilia(null); };
 
   // Planes de acción del grupo, sin datos que identifiquen al alumno (simulados + capturados en este navegador).
   const planes = usePlanes(salon.salonId);
@@ -127,7 +122,7 @@ export default function Maestro() {
           </>
         ) : (
           <>
-            <button className="rg-pill rg-pill--blue rg-tap" onClick={salirDeCrisis}>← Volver</button>
+            <button className="rg-pill rg-pill--blue rg-tap" onClick={() => setCrisis(false)}>← Volver</button>
             <h1>Guía de crisis</h1>
             <ol className="rg-steps">
               {PASOS_CRISIS.map((p, i) => (
@@ -138,14 +133,11 @@ export default function Maestro() {
               ))}
             </ol>
             <a className="rg-pill rg-pill--danger rg-full rg-sos" href="tel:911">Llamar al 911</a>
-            <button type="button" className="rg-pill rg-pill--primary rg-full rg-tap"
-              onClick={avisarFamilia} disabled={avisoFamilia !== null}>
-              {avisoFamilia ? "Familia avisada" : "Avisar a la familia"}
-            </button>
-            <div aria-live="polite">
-              {avisoFamilia && (
-                <p className="rg-sent">✓ Se avisó a la familia a las {avisoFamilia} (simulado).</p>
-              )}
+            {/* El sistema no guarda qué familia es de qué alumno (cero nombres), así que no avisa solo:
+                la maestra llama al teléfono que la escuela ya tiene registrado. */}
+            <div className="rg-plan rg-surface-lilac">
+              <strong>Avisa a su familia</strong>
+              <span>Llama a la familia del alumno al número de teléfono que ya tiene registrado la escuela.</span>
             </div>
             <p className="rg-muted">
               Guía general de ejemplo. Siempre sigue el plan de acción del alumno. Respira GDL orienta y alerta;
