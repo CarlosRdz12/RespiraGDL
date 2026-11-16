@@ -14,6 +14,12 @@ const REFRESCAR_MS = 60000;
 
 const llego = (r) => r.status === "fulfilled";
 
+// "2026-11-15T18:38:00" más reciente de /lecturas/nodos -> "18:38" (null si no hay nodos).
+function ultimaDe(nodos) {
+  const fechas = (Array.isArray(nodos) ? nodos : []).map((x) => x.ultima).filter(Boolean).sort();
+  return fechas.length ? String(fechas[fechas.length - 1]).slice(11, 16) : null;
+}
+
 // Vuelve a cargar cada minuto mientras haya API.
 function useRefresco(activo) {
   const [vuelta, setVuelta] = useState(0);
@@ -41,6 +47,8 @@ export function useTableroDatos(modo, seleccionado) {
   const [datos, setDatos] = useState({ escuela: MOCK_ESCUELA, salones: MOCK_SALONES, pronostico: MOCK_PRONOSTICO });
   const [lecturas, setLecturas] = useState(MOCK_LECTURAS);
   const [origen, setOrigen] = useState({ estado: "cargando", simuladas: false });
+  // Hora ("HH:MM") de la lectura más reciente de cualquier nodo, para avisar cuando los sensores no mandan.
+  const [ultimaLectura, setUltimaLectura] = useState(null);
   const vivo = useVivo();
   const vuelta = useRefresco(modo === "api");
 
@@ -52,6 +60,7 @@ export function useTableroDatos(modo, seleccionado) {
         apiDatos.escuela(), apiDatos.salones(), apiDatos.pronosticoManana(), apiDatos.nodos(),
       ]);
       if (!vivo.current) return;
+      setUltimaLectura(llego(n) ? ultimaDe(n.value) : null);
       setDatos((d) => ({
         escuela: llego(e) ? e.value : d.escuela,
         salones: llego(s) ? s.value : d.salones,
@@ -82,7 +91,7 @@ export function useTableroDatos(modo, seleccionado) {
   }, [modo, seleccionado, vuelta, vivo]);
 
   const origenFinal = serieFalla && origen.estado === "api" ? { ...origen, estado: "parcial" } : origen;
-  return { ...datos, lecturas, origen: origenFinal };
+  return { ...datos, lecturas, origen: origenFinal, ultimaLectura };
 }
 
 /** Vista de la maestra: semáforo, alumnos con asma y "Qué hacer hoy" (con las marcas guardadas en la API). */
@@ -105,8 +114,9 @@ export function useMaestraDatos(modo, salonId) {
         setSalon(h.value);
         setOrigen({ estado: "api", simuladas: llego(n) && haySimuladas(n.value) });
       } else {
+        // La API sí responde, pero no tiene la vista de la maestra (p. ej. antes del PR #38).
         desdeApi.current = false;
-        setOrigen({ estado: "demo", simuladas: true });
+        setOrigen({ estado: "parcial", simuladas: true });
       }
     })();
   }, [modo, salonId, vuelta, vivo]);

@@ -132,7 +132,7 @@ export default function Tablero() {
   // Con API: escuela (/escuelas/miravalle), salones (/salones), pronóstico (/pronostico/manana) y la
   // serie del salón elegido (/lecturas/serie?salon_id=…), cada minuto. Sin API: datos simulados de demo.js.
   const modoApi = useConexionApi(apiAvisos);
-  const { escuela, salones, pronostico, lecturas, origen } = useTableroDatos(modoApi, seleccionado);
+  const { escuela, salones, pronostico, lecturas, origen, ultimaLectura } = useTableroDatos(modoApi, seleccionado);
 
   // Aviso a familias con la API (POST /alertas/enviar; el bot lo reparte). Sin API, se simula.
   const { envio, enviar } = useEnvioAviso(apiAvisos, modoApi);
@@ -141,6 +141,8 @@ export default function Tablero() {
 
   // Derivados de los datos (se calculan de lo que mande /salones). Sin dato de protección no hay alerta.
   const alertas = salones.filter((s) => s.proteccion != null && s.proteccion < PROTECCION_MINIMA);
+  // Salones sin lecturas en la ventana de la API (la última hora): se explica en vez de dejar solo "—".
+  const sinLecturas = salones.filter((s) => s.fuera == null && s.dentro == null);
   const salon = salones.find((s) => s.id === seleccionado) ?? salones[0];
   const serie = lecturas[salon?.id] ?? [];
   const sem = SEMAFORO[pronostico.semaforo] ?? SEMAFORO.amarillo;
@@ -212,6 +214,17 @@ export default function Tablero() {
           <p className="rg-muted">
             Toca un grupo para ver su gráfica. PM2.5 en µg/m³. "Con plan": planes de asma que llenaron las familias.
           </p>
+
+          {sinLecturas.length > 0 && (
+            <p className="rg-aviso__error" role="status">
+              <strong>
+                {sinLecturas.length === salones.length
+                  ? "Sin lecturas de los sensores en la última hora"
+                  : `${sinLecturas.map((s) => s.grupo).join(", ")}: sin lecturas en la última hora`}
+              </strong>
+              {ultimaLectura ? ` (última lectura: ${ultimaLectura})` : ""}. Revisen que los nodos estén encendidos.
+            </p>
+          )}
 
           {alertas.map((s) => (
             <p key={s.id} className="rg-warn" role="alert">
