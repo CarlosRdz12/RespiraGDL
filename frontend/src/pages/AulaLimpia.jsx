@@ -1,7 +1,7 @@
 // Aula Limpia: sensor + filtro casero por salón. Página base para que el
 // equipo de Aula Limpia la complete (estado del nodo, filtro, lecturas).
 import { SALONES } from "../data/demo.js";
-import { Semaforo } from "./Tablero.jsx";
+import { Semaforo, semaforoDe } from "./Tablero.jsx";
 
 export default function AulaLimpia() {
   return (
@@ -15,8 +15,9 @@ export default function AulaLimpia() {
         <a className="rg-pill rg-pill--blue" href="#/tablero">Ver tablero</a>
       </div>
       <div className="rg-grid3">
+        {/* Fondo con el color del semáforo del aire de adentro: el mismo que la píldora. */}
         {SALONES.map((s) => (
-          <div key={s.id} className={`rg-panel ${s.filtro ? "rg-surface-mint" : "rg-surface-mist"}`}>
+          <div key={s.id} className={`rg-panel rg-aq-bg--${semaforoDe({ pm: s.dentro }).id}`}>
             <div className="rg-panel__head">
               <h2>Salón {s.id}</h2>
               <Semaforo pm={s.dentro} />

@@ -16,11 +16,17 @@ import { salir } from "../data/sesion.js";
 // Buena o Aceptable = verde, Mala = amarillo, Muy mala o peor = rojo.
 const COLOR_POR_NIVEL = { good: "verde", ok: "verde", bad: "amarillo", vbad: "rojo", ext: "rojo" };
 
+// Semáforo ({id, nombre} de SEMAFORO) para un color de la API o, si no llega, para un PM2.5.
+// Lo usan la píldora y el fondo de las tarjetas de Aula Limpia, para que nunca digan colores distintos.
+export function semaforoDe({ color, pm }) {
+  const c = color ?? (pm != null ? COLOR_POR_NIVEL[nivelPm25(pm)?.id] : undefined);
+  return SEMAFORO[c] ?? SEMAFORO.amarillo;
+}
+
 // Píldora del semáforo. `color` es lo que manda la API: "verde" | "amarillo" | "rojo".
 // Si no llega color (p. ej. Aula Limpia solo pasa `pm`), se calcula con el PM2.5.
 export function Semaforo({ color, pm, big, prefijo }) {
-  const c = color ?? (pm != null ? COLOR_POR_NIVEL[nivelPm25(pm)?.id] : undefined);
-  const s = SEMAFORO[c] ?? SEMAFORO.amarillo;
+  const s = semaforoDe({ color, pm });
   return (
     <span className={`rg-aq rg-aq--${s.id}${big ? " rg-aq--big" : ""}`}>
       <i aria-hidden="true" />
