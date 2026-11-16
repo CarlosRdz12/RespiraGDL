@@ -44,7 +44,7 @@ Grupos: 1A, 2A, 3A, 4B, 5A, 6B (los mismos del frontend y del backend).
 | Reportes de síntomas (`1`) | Conteo local del día; copia en la API con `POST /reportes-sintomas` (con `grupo` solo si la familia marcó uno) | El bot sigue con su conteo |
 | Hora del aviso diario | `GET /alertas/programacion` cada minuto (la que guarda el tablero) | `HORA_AVISO` de `bot/.env` |
 
-- **Aviso automático:** todos los días a las `HORA_AVISO` (07:00 si no se pone). **No se manda** si el pronóstico real no está disponible, está desactualizado o la API dice que es `simulado`: nunca sale con datos de ejemplo ni de prueba.
+- **Aviso automático:** todos los días a las `HORA_AVISO` (07:00 si no se pone). **No se manda** si el pronóstico real no está disponible, está desactualizado o la API dice que es `simulado`: nunca sale con datos de ejemplo ni de prueba. Por si la API no trae `simulado`, el bot también revisa `GET /lecturas/nodos`: si el pronóstico sale del sensor de afuera y ese nodo tiene lecturas simuladas, no lo manda. Antes de usar sensores reales, borren las simuladas con `python -m scripts.cargar_demo --borrar-simuladas` (en `backend/`).
 - **Mensaje de la escuela:** si el tablero guardó un mensaje (`GET /alertas/programacion`), el aviso diario y `/simular` lo agregan debajo del pronóstico como "Mensaje de la escuela". No reemplaza al semáforo ni al PM2.5, que siempre son los del día. Sin pronóstico real no sale aunque haya mensaje; para eso el tablero tiene "Enviar ahora".
 - **Avisos con grupo:** si el aviso trae `grupo` (ej. `"3A"`), solo llega a las familias que marcaron ese grupo; sin grupo, a toda la escuela.
 - **Un aviso no se repite:** el bot recuerda los ids que ya repartió, aunque falle el marcado en la API.

@@ -192,13 +192,33 @@ async def obtener_pronostico(context: ContextTypes.DEFAULT_TYPE) -> dict:
         nombre, color = nivel(pm)
         # La API marca simulado=true cuando el pronóstico sale de lecturas de prueba (cargar_demo o
         # simular_nodos). Se muestra con /manana, pero el aviso automático diario no sale.
-        simulado = bool(p.get("simulado"))
+        simulado = bool(p.get("simulado")) or await sensor_afuera_simulado(context, p)
         return {"pm25": pm, "nivel": manana.get("nombre", nombre), "semaforo": manana.get("semaforo", color),
                 "simulado": simulado,
                 "nota": "Datos de prueba: las lecturas de hoy son simuladas." if simulado else None}
     except (httpx.HTTPError, ValueError, KeyError, TypeError) as e:
         log.info("Pronóstico de la API no disponible (%s); se usan datos de ejemplo.", e)
         return pronostico_ejemplo(MOCK_PM25_MANANA)
+
+
+async def sensor_afuera_simulado(context: ContextTypes.DEFAULT_TYPE, p: dict) -> bool:
+    """Segunda revisión, por si la API no manda `simulado` (versiones anteriores al PR #38).
+
+    Si el pronóstico sale del sensor de afuera (fuente "sensor") y ese nodo tiene lecturas simuladas
+    (GET /lecturas/nodos), se trata como de prueba. Con fuente "modelo" o "persistencia" el pronóstico
+    viene de la serie del SIMAJ y el sensor no cuenta. Si no se puede revisar, manda lo que diga la API.
+    Ojo: la API marca el nodo como simulado mientras tenga alguna lectura simulada guardada; antes de usar
+    sensores reales corran `python -m scripts.cargar_demo --borrar-simuladas` en backend/.
+    """
+    if p.get("fuente") != "sensor":
+        return False
+    r = await llamar_api(cliente(context), "GET", "/lecturas/nodos", avisar_falla=False)
+    if r is None:
+        return False
+    try:
+        return any(n.get("ubicacion") == "fuera" and n.get("simulada") for n in r.json())
+    except (ValueError, AttributeError, TypeError):
+        return False
 
 
 def pronostico_ejemplo(pm: int) -> dict:
