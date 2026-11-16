@@ -60,7 +60,7 @@ export const MOCK_ESCUELA = {
 // Endpoint esperado: GET /salones
 // Forma esperada por fila: { id, grupo, fuera, dentro, proteccion, asma, filtro }
 // "asma" es solo un número: nunca nombres ni datos de alumnos.
-// Mismos salones que backend/scripts/cargar_demo.py y que SALONES de Aula Limpia:
+// Mismos salones que backend/scripts/cargar_demo.py (los usan el tablero y Aula Limpia):
 // 1A, 2A, 3A, 4B, 5A, 6B; 4B y 6B todavía no tienen filtro.
 // ---------------------------------------------------------------------
 export const MOCK_SALONES = [
@@ -72,9 +72,6 @@ export const MOCK_SALONES = [
   { id: "6B", grupo: "6° B", fuera: 62, dentro: 58, asma: 3, filtro: false },
 ].map((s) => ({ ...s, proteccion: proteccion(s.fuera, s.dentro) }));
 // --- FIN MOCK SALONES ---
-
-// Nombre que usa la página Aula Limpia (src/pages/AulaLimpia.jsx). Son los mismos salones.
-export const SALONES = MOCK_SALONES;
 
 // ---------------------------------------------------------------------
 // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
