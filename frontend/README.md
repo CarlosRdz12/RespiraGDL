@@ -1,12 +1,13 @@
 # Frontend Respira GDL
 
-Landing, tablero de la escuela y vista del maestro. React 18 + Vite, sin más dependencias.
+Landing, tablero de la escuela, Aula Limpia y vista del maestro. React 18 + Vite; la única otra dependencia es Recharts (gráfica del tablero).
 
 En vivo: https://ceilingofe.github.io/respiragdl/ (se publica solo en cada push a `main` que toque `frontend/`).
 
 | Ruta | Qué es |
 | --- | --- |
 | `#/` | Landing con el hero rotativo de los 3 pilares |
+| `#/aula` | Aula Limpia (director): una tarjeta por salón con el semáforo del aire de adentro, si tiene filtro y su % de protección |
 | `#/tablero` | Tablero del director: semáforo, alertas por salón, gráfica fuera/dentro (Recharts), tabla de salones y pronóstico |
 | `#/maestro` | Vista de celular de la maestra de cada grupo: semáforo, alumnos con asma, checklist del día, factores a cuidar y expedientes del grupo (ventanas modales, sin identificar) y botón de crisis |
 | `#/alumno` | Vista de la familia: llena, edita o borra el plan de asma de su hijo (sin nombre ni teléfono) |
@@ -49,13 +50,13 @@ La URL de la API va en `frontend/.env.local` como `VITE_API_URL=...` (ver `front
 | Qué | Ruta (se refresca cada minuto) |
 | --- | --- |
 | Encabezado y semáforo de hoy | `GET /escuelas/miravalle` |
-| Tabla de salones y alertas de protección baja | `GET /salones?escuela=miravalle` |
+| Tabla de salones, alertas de protección baja y tarjetas de Aula Limpia | `GET /salones?escuela=miravalle` |
 | Gráfica del salón elegido | `GET /lecturas/serie?salon_id={id}` (existe en todas las versiones de la API; si la respuesta no tiene la forma `{h, fuera, dentro}`, se usa el respaldo) |
 | Pronóstico de mañana | `GET /pronostico/manana` (si viene `desactualizado`, el botón de aviso se desactiva) |
 | ¿Lecturas simuladas? | `GET /lecturas/nodos` (campo `simulada`) |
 | Vista de la maestra | `GET /salones/{id}/hoy`; "Qué hacer hoy" se guarda con `POST /salones/{id}/tareas/{tarea}` |
 
-Sin dato de un sensor, la tabla muestra "—" en vez de un número. **Simulado aunque haya API:** el acceso por rol y los planes de asma de las familias. La guía de crisis no avisa sola a la familia (el sistema no guarda qué familia es de qué alumno): le indica a la maestra que llame al teléfono que ya tiene registrado la escuela.
+Sin dato de un sensor, la tabla muestra "—" en vez de un número y un aviso dice qué salones no tienen lecturas en la última hora y la hora de la última lectura (de `GET /lecturas/nodos`). La API calcula fuera, dentro y protección con las lecturas de la última hora: para la demo, corran `python -m scripts.cargar_demo --lecturas` (en `backend/`) poco antes de presentar, o dejen corriendo `scripts.simular_nodos`. **Simulado aunque haya API:** el acceso por rol y los planes de asma de las familias. La guía de crisis no avisa sola a la familia (el sistema no guarda qué familia es de qué alumno): le indica a la maestra que llame al teléfono que ya tiene registrado la escuela.
 
 ### Aviso a familias (ya conectado)
 
