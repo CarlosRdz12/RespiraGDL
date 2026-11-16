@@ -78,7 +78,7 @@ export const SALONES = MOCK_SALONES;
 
 // ---------------------------------------------------------------------
 // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-// Endpoint esperado: GET /lecturas?salon={id}&fecha=hoy   (un llamado por salón seleccionado)
+// Endpoint: GET /lecturas/serie?salon_id={id}   (un llamado por salón seleccionado)
 // Forma esperada: [{ h: "7:00", fuera: 41, dentro: 35 }, ...] de 7:00 a 16:00
 // "fuera" es el mismo sensor exterior para toda la escuela; "dentro" es el nodo de cada salón.
 // A las 10:00 (índice 3) los valores coinciden con la tabla de MOCK_SALONES.

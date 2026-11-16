@@ -130,7 +130,7 @@ export default function Tablero() {
   const [seleccionado, setSeleccionado] = useState("3A");
 
   // Con API: escuela (/escuelas/miravalle), salones (/salones), pronóstico (/pronostico/manana) y la
-  // serie del salón elegido (/lecturas?salon=…&fecha=hoy), cada minuto. Sin API: datos simulados de demo.js.
+  // serie del salón elegido (/lecturas/serie?salon_id=…), cada minuto. Sin API: datos simulados de demo.js.
   const modoApi = useConexionApi(apiAvisos);
   const { escuela, salones, pronostico, lecturas, origen } = useTableroDatos(modoApi, seleccionado);
 

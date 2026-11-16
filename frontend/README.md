@@ -50,7 +50,7 @@ La URL de la API va en `frontend/.env.local` como `VITE_API_URL=...` (ver `front
 | --- | --- |
 | Encabezado y semáforo de hoy | `GET /escuelas/miravalle` |
 | Tabla de salones y alertas de protección baja | `GET /salones?escuela=miravalle` |
-| Gráfica del salón elegido (7:00 a 16:00) | `GET /lecturas?salon={id}&fecha=hoy` |
+| Gráfica del salón elegido | `GET /lecturas/serie?salon_id={id}` (existe en todas las versiones de la API; si la respuesta no tiene la forma `{h, fuera, dentro}`, se usa el respaldo) |
 | Pronóstico de mañana | `GET /pronostico/manana` (si viene `desactualizado`, el botón de aviso se desactiva) |
 | ¿Lecturas simuladas? | `GET /lecturas/nodos` (campo `simulada`) |
 | Vista de la maestra | `GET /salones/{id}/hoy`; "Qué hacer hoy" se guarda con `POST /salones/{id}/tareas/{tarea}` |

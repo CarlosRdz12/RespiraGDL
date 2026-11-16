@@ -63,19 +63,26 @@ export function useTableroDatos(modo, seleccionado) {
     })();
   }, [modo, vuelta, vivo]);
 
-  // Serie del salón seleccionado: se pide al elegirlo y en cada refresco.
+  // Serie del salón seleccionado: se pide al elegirlo y en cada refresco. Si falla se usa la simulada y
+  // se recuerda aparte, para que la carga de arriba (que puede terminar después) no borre el "parcial".
+  const [serieFalla, setSerieFalla] = useState(false);
   useEffect(() => {
     if (modo !== "api" || !seleccionado) return;
     apiDatos.lecturas(seleccionado)
-      .then((serie) => { if (vivo.current) setLecturas((l) => ({ ...l, [seleccionado]: serie })); })
+      .then((serie) => {
+        if (!vivo.current) return;
+        setLecturas((l) => ({ ...l, [seleccionado]: serie }));
+        setSerieFalla(false);
+      })
       .catch(() => {
         if (!vivo.current) return;
         setLecturas((l) => ({ ...l, [seleccionado]: MOCK_LECTURAS[seleccionado] ?? [] }));
-        setOrigen((o) => (o.estado === "api" ? { ...o, estado: "parcial" } : o));
+        setSerieFalla(true);
       });
   }, [modo, seleccionado, vuelta, vivo]);
 
-  return { ...datos, lecturas, origen };
+  const origenFinal = serieFalla && origen.estado === "api" ? { ...origen, estado: "parcial" } : origen;
+  return { ...datos, lecturas, origen: origenFinal };
 }
 
 /** Vista de la maestra: semáforo, alumnos con asma y "Qué hacer hoy" (con las marcas guardadas en la API). */
