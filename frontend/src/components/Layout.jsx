@@ -82,7 +82,8 @@ export function Footer() {
       </div>
       <div className="rg-footer__bar">
         <span>© 2026 Equipo Respira GDL · Sergio, Juan, Carlos y Damaris</span>
-        <span>Datos de la demo simulados</span>
+        {/* Cada pantalla dice arriba si sus datos son de la API o simulados (NotaDatos). */}
+        <span>Cada pantalla indica si sus datos son simulados</span>
       </div>
     </footer>
   );
