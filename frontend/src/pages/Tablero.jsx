@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
@@ -7,7 +7,8 @@ import {
   MOCK_ESCUELA, MOCK_SALONES, MOCK_LECTURAS, MOCK_PRONOSTICO,
   // API_URL, // <- descomentar al conectar la API
 } from "../data/demo.js";
-import AvisoFamilias from "../components/AvisoFamilias.jsx";
+import AvisoFamilias, { EstadoEnvio } from "../components/AvisoFamilias.jsx";
+import { apiAvisos, useConexionApi, useEnvioAviso } from "../data/useAvisos.js";
 import { usePlanes } from "../data/planes.js";
 import { salir } from "../data/sesion.js";
 
@@ -136,9 +137,10 @@ export default function Tablero() {
 
   // Estado de la interfaz (no es mock): salón elegido en la tabla y envío del aviso.
   const [seleccionado, setSeleccionado] = useState("3A");
-  const [envio, setEnvio] = useState("listo"); // "listo" | "enviando" | "enviado"
-  const timer = useRef();
-  useEffect(() => () => clearTimeout(timer.current), []);
+
+  // Aviso a familias con la API (POST /alertas/enviar; el bot lo reparte). Sin API, se simula.
+  const modoApi = useConexionApi(apiAvisos);
+  const { envio, enviar } = useEnvioAviso(apiAvisos, modoApi);
 
   // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
   // Al conectar: cambien los useState de arriba a useState(null) o [] y descomenten esto.
@@ -157,12 +159,8 @@ export default function Tablero() {
     //   .then((serie) => setLecturas((l) => ({ ...l, [seleccionado]: serie })));
   }, [seleccionado]);
 
-  const enviarAviso = () => {
-    setEnvio("enviando");
-    // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-    // Reemplazar el setTimeout por: fetch(`${API_URL}/alertas/enviar`, { method: "POST" }).then(() => setEnvio("enviado"))
-    timer.current = setTimeout(() => setEnvio("enviado"), 1200);
-  };
+  // Sin mensaje: la API usa su texto sugerido según el pronóstico de mañana.
+  const enviarAviso = () => enviar();
 
   // Derivados de los datos (no son mock: se calculan de lo que mande /salones)
   const alertas = salones.filter((s) => s.proteccion < PROTECCION_MINIMA);
@@ -269,17 +267,17 @@ export default function Tablero() {
               de alumnos con asma.
             </p>
             <button type="button" className="rg-pill rg-pill--primary rg-full rg-tap"
-              onClick={enviarAviso} disabled={envio !== "listo"}>
-              {envio === "enviando" ? "Enviando…" : envio === "enviado" ? "Aviso enviado" : "Enviar aviso a familias"}
+              onClick={enviarAviso} disabled={modoApi === "cargando" || !["listo", "error"].includes(envio.estado)}>
+              {["enviando", "en-cola"].includes(envio.estado) ? "Enviando…"
+                : envio.estado === "enviado" ? "Aviso enviado"
+                  : envio.estado === "error" ? "Reintentar envío" : "Enviar aviso a familias"}
             </button>
             <div aria-live="polite">
-              {envio === "enviado" && (
-                <p className="rg-sent"><IconoCheck />Aviso enviado a {pronostico.familiasAviso} familias por Telegram (simulado).</p>
-              )}
+              <EstadoEnvio envio={envio} familiasDemo={pronostico.familiasAviso} icono={<IconoCheck />} />
             </div>
           </section>
 
-          <AvisoFamilias datos={{
+          <AvisoFamilias modo={modoApi} datos={{
             escuela: escuela.nombre, semaforo: pronostico.semaforo,
             pm25: pronostico.pm25, familias: pronostico.familiasAviso,
           }} />

@@ -37,6 +37,19 @@ npm run build    # genera dist/
 
 Todo sale de `src/data/demo.js` y **es simulado**. Busquen `TODO: CONECTAR A LA API`: cada `useState` arranca con un `MOCK_*` y cada página trae un `useEffect` con el `fetch` comentado (`/salones`, `/lecturas`, `/pronostico/manana`, `/salones/3A/hoy`). Para conectar: descomenten el fetch, borren el bloque `MOCK_*` y pongan la URL en `frontend/.env.local` como `VITE_API_URL=...`.
 
+### Aviso a familias (ya conectado)
+
+El aviso a familias del tablero ya usa la API (`src/data/avisosApi.js` y `src/data/useAvisos.js`):
+
+| Qué | Ruta | Sin API (GitHub Pages) |
+| --- | --- | --- |
+| Botón "Enviar aviso a familias" de la tarjeta de pronóstico | `POST /alertas/enviar` sin mensaje (la API usa su texto sugerido) | Se simula y dice "(simulado)" |
+| "Enviar ahora" de la ventana | `POST /alertas/enviar` con el mensaje escrito | Se simula y dice "(simulado)" |
+| Confirmación del envío | `GET /alertas/aviso` cada 4 s hasta que el bot lo marca enviado (máx. 2 min) | — |
+| Hora del aviso diario y nota de la escuela | `GET`/`PUT /alertas/programacion` (la nota es `mensaje`; el bot la agrega debajo del pronóstico) | Se guardan en este navegador |
+
+Al abrir el tablero se consulta `GET /salud`: si responde, todo va a la API y la pantalla deja de decir "(simulado)". Si la API responde pero no tiene una ruta, la pantalla muestra el error en vez de fingir que se envió. Los mensajes tienen máximo 600 caracteres, igual que la API.
+
 ## Diseño
 
 Todo el frontend sigue la [guía de diseño](../docs/diseno/README.md). `src/styles/tokens.css` tiene las variables y `src/styles/app.css` los componentes; no usen hex sueltos. Las ilustraciones de `src/art/Art.jsx` son SVG temporales hasta tener fotos con licencia.

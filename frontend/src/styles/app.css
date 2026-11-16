@@ -358,6 +358,14 @@ p { line-height: 1.6; }
   .rg-modal__body { padding: var(--rg-space-4) var(--rg-space-3); }
   .rg-textarea { min-height: 220px; }
 }
+/* Aviso a familias: nota diaria (más corta que el mensaje) y avisos de error sin colores del semáforo */
+.rg-textarea.rg-textarea--nota { min-height: 96px; }
+.rg-textarea:disabled, .rg-time:disabled { opacity: 0.6; }
+.rg-aviso__guardar { align-self: flex-start; }
+.rg-aviso__error {
+  border-radius: var(--rg-r-md); padding: var(--rg-space-3); background: var(--rg-lilac);
+  color: var(--rg-ink); font-size: var(--rg-fs-small); font-weight: 500;
+}
 
 /* Inicio de sesión (simulado) */
 .rg-login, .rg-plan-form { display: flex; flex-direction: column; gap: var(--rg-space-4); }

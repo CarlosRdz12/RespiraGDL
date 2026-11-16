@@ -12,7 +12,8 @@ const CONSEJO = {
 };
 
 export const HORA_PREDETERMINADA = "07:00";
-export const MAX_CARACTERES = 1000;
+// Igual al máximo de la API (mensaje de /alertas/enviar y /alertas/programacion): si cambia allá, cambia aquí.
+export const MAX_CARACTERES = 600;
 
 export function mensajePredeterminado({ escuela, semaforo, pm25 }) {
   const nivel = nivelPm25(pm25);
