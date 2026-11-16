@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SEMAFORO } from "../data/demo.js";
-import { mockMaestra } from "../data/maestras.js";
 import TarjetaModal from "../components/TarjetaModal.jsx";
-// import { API_URL } from "../data/demo.js"; // <- descomentar al conectar la API
+import NotaDatos from "../components/NotaDatos.jsx";
+import { apiAvisos, useConexionApi } from "../data/useAvisos.js";
+import { useMaestraDatos } from "../data/useDatos.js";
 import { Semaforo } from "./Tablero.jsx";
 import { ResumenPlan } from "./Alumno.jsx";
 import { usePlanes, DETONANTES } from "../data/planes.js";
@@ -31,14 +32,11 @@ export default function Maestro() {
   // Grupo de la maestra que inició sesión (maestra1 = 1° A ... maestra6 = 6° B).
   const salonId = useSesion()?.salonId ?? "3A";
 
-  // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-  // Resumen del salón (semáforo y número de alumnos con asma) -> GET /salones/{salonId}/hoy
-  const [salon, setSalon] = useState(() => mockMaestra(salonId));
-
-  // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-  // Checklist "Qué hacer hoy". Hoy vive solo en el navegador; si backend guarda
-  // las marcas, inicializar desde GET /salones/{salonId}/hoy y mandar un POST en `marcar`.
-  const [tareas, setTareas] = useState(() => mockMaestra(salonId).tareas);
+  // Resumen del salón (semáforo, alumnos con asma) y "Qué hacer hoy": GET /salones/{salonId}/hoy cada
+  // minuto; las marcas se guardan con POST /salones/{salonId}/tareas/{id}. Sin API: datos simulados.
+  const modoApi = useConexionApi(apiAvisos);
+  const { salon, origen, marcar, errorTarea } = useMaestraDatos(modoApi, salonId);
+  const tareas = salon.tareas;
 
   // Estado de la interfaz (no es mock): muestra u oculta la guía de crisis.
   const [crisis, setCrisis] = useState(false);
@@ -47,24 +45,9 @@ export default function Maestro() {
   const planes = usePlanes(salon.salonId);
   const factores = contarFactores(planes);
 
-  // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-  // Al conectar: descomenten el fetch y borren MOCK_MAESTRA de demo.js y mockMaestra de maestras.js.
-  useEffect(() => {
-    // fetch(`${API_URL}/salones/${salonId}/hoy`).then((r) => r.json()).then((d) => {
-    //   setSalon(d);
-    //   setTareas(d.tareas);
-    // });
-  }, []);
-
-  const marcar = (id) => {
-    setTareas((t) => t.map((x) => (x.id === id ? { ...x, hecho: !x.hecho } : x)));
-    // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-    // fetch(`${API_URL}/salones/${salonId}/tareas/${id}`, { method: "POST" });
-  };
-
   return (
     <main className="rg-app rg-app--phone">
-      <div className="rg-demo-note">Demo con datos simulados. La guía es un ejemplo y debe validarla un médico.</div>
+      <NotaDatos origen={origen} extra="La guía es un ejemplo y debe validarla un médico." />
       <div className="rg-phone-bar">
         <span className="rg-muted">Vista del maestro · {salon.momento}</span>
         <button type="button" className="rg-pill rg-pill--blue rg-tap" onClick={salir}>Salir</button>
@@ -77,7 +60,9 @@ export default function Maestro() {
 
             <div className={`rg-today rg-aq-bg--${SEMAFORO[salon.semaforo]?.id}`}>
               <small>Semáforo de hoy</small>
-              <Semaforo color={salon.semaforo} pm={salon.pm25} big />
+              {salon.semaforo || salon.pm25 != null
+                ? <Semaforo color={salon.semaforo} pm={salon.pm25} big />
+                : <strong>Sin dato de hoy</strong>}
             </div>
             <div className="rg-kpi rg-surface-mint">
               <small>Alumnos con asma en el grupo</small>
@@ -96,6 +81,9 @@ export default function Maestro() {
                 </li>
               ))}
             </ul>
+            {errorTarea && (
+              <p className="rg-aviso__error" role="alert">No se pudo guardar la marca. Revise la conexión e intente de nuevo.</p>
+            )}
 
             <h2 className="rg-phone__h2">Planes de acción del grupo</h2>
 

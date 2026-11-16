@@ -35,7 +35,27 @@ npm run build    # genera dist/
 
 ## Datos
 
-Todo sale de `src/data/demo.js` y **es simulado**. Busquen `TODO: CONECTAR A LA API`: cada `useState` arranca con un `MOCK_*` y cada página trae un `useEffect` con el `fetch` comentado (`/salones`, `/lecturas`, `/pronostico/manana`, `/salones/3A/hoy`). Para conectar: descomenten el fetch, borren el bloque `MOCK_*` y pongan la URL en `frontend/.env.local` como `VITE_API_URL=...`.
+La URL de la API va en `frontend/.env.local` como `VITE_API_URL=...` (ver `frontend/.env.example`). Al abrir una pantalla se consulta `GET /salud`: si responde, los datos salen de la API; si no, se usan los datos simulados de `src/data/demo.js`. Arriba de cada pantalla una nota dice de dónde salen los datos (regla 5 del kit):
+
+| Nota | Cuándo |
+| --- | --- |
+| "Demo con datos simulados: no hay conexión con la API." | Sin API (GitHub Pages) |
+| "Datos de la API con lecturas simuladas (sin sensores físicos)." | La API responde, pero algún nodo o el pronóstico usa lecturas simuladas |
+| "Datos en vivo de los sensores y la API." | Todo viene de sensores reales |
+| "Algunos datos no llegaron de la API; esos se muestran simulados." | Falló alguna ruta |
+
+### Tablero y vista de la maestra (`src/data/datosApi.js` y `src/data/useDatos.js`)
+
+| Qué | Ruta (se refresca cada minuto) |
+| --- | --- |
+| Encabezado y semáforo de hoy | `GET /escuelas/miravalle` |
+| Tabla de salones y alertas de protección baja | `GET /salones?escuela=miravalle` |
+| Gráfica del salón elegido (7:00 a 16:00) | `GET /lecturas?salon={id}&fecha=hoy` |
+| Pronóstico de mañana | `GET /pronostico/manana` (si viene `desactualizado`, el botón de aviso se desactiva) |
+| ¿Lecturas simuladas? | `GET /lecturas/nodos` (campo `simulada`) |
+| Vista de la maestra | `GET /salones/{id}/hoy`; "Qué hacer hoy" se guarda con `POST /salones/{id}/tareas/{tarea}` |
+
+Sin dato de un sensor, la tabla muestra "—" en vez de un número. **Simulado aunque haya API:** el botón "Avisar a la familia" de la guía de crisis (avisar a una familia exige saber qué alumno es y el sistema no guarda nombres; pendiente de definir con backend), el acceso por rol y los planes de asma de las familias.
 
 ### Aviso a familias (ya conectado)
 

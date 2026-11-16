@@ -7,10 +7,10 @@
 // Escuela de la demo; la misma que usan el bot (ESCUELA_ID) y backend/scripts/cargar_demo.py.
 export const ESCUELA_ID = "miravalle";
 
-export function crearClienteAvisos(base, { fetchFn = globalThis.fetch, timeoutMs = 5000 } = {}) {
+/** fetch a la API con tiempo límite; lanza error si no responde o si el estado no es 2xx. Regresa el JSON. */
+export function crearPedir(base, { fetchFn = globalThis.fetch, timeoutMs = 5000 } = {}) {
   const url = (ruta) => `${String(base).replace(/\/+$/, "")}${ruta}`;
-
-  async function pedir(ruta, { metodo = "GET", cuerpo } = {}) {
+  return async function pedir(ruta, { metodo = "GET", cuerpo } = {}) {
     const control = new AbortController();
     const reloj = setTimeout(() => control.abort(), timeoutMs);
     try {
@@ -25,8 +25,11 @@ export function crearClienteAvisos(base, { fetchFn = globalThis.fetch, timeoutMs
     } finally {
       clearTimeout(reloj);
     }
-  }
+  };
+}
 
+export function crearClienteAvisos(base, opciones = {}) {
+  const pedir = crearPedir(base, opciones);
   const qs = `escuela_id=${encodeURIComponent(ESCUELA_ID)}`;
   const limpiar = (texto) => {
     const t = (texto ?? "").trim();

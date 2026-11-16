@@ -4,11 +4,11 @@ import {
 } from "recharts";
 import {
   SEMAFORO, NORMA_PM25, PROTECCION_MINIMA, PROTECCION_BUENA, nivelPm25,
-  MOCK_ESCUELA, MOCK_SALONES, MOCK_LECTURAS, MOCK_PRONOSTICO,
-  // API_URL, // <- descomentar al conectar la API
 } from "../data/demo.js";
 import AvisoFamilias, { EstadoEnvio } from "../components/AvisoFamilias.jsx";
+import NotaDatos from "../components/NotaDatos.jsx";
 import { apiAvisos, useConexionApi, useEnvioAviso } from "../data/useAvisos.js";
+import { useTableroDatos } from "../data/useDatos.js";
 import { usePlanes } from "../data/planes.js";
 import { salir } from "../data/sesion.js";
 
@@ -109,7 +109,9 @@ function GraficaLecturas({ data, grupo }) {
 }
 
 // Número de PM2.5 coloreado por nivel, siempre con la palabra (nunca color solo).
+// Sin dato (el sensor no mandó lecturas en la última hora) se muestra una raya, no "Buena".
 function Pm({ valor }) {
+  if (valor == null) return <span className="rg-muted" title="Sin lecturas recientes">—</span>;
   const n = nivelPm25(valor);
   return (
     <span className={`rg-pm rg-pm--${n.id}`}>
@@ -120,63 +122,34 @@ function Pm({ valor }) {
 }
 
 export default function Tablero() {
-  // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-  // Datos de la escuela y semáforo de hoy. Valor inicial = mock; la API lo sobrescribe.
-  const [escuela, setEscuela] = useState(MOCK_ESCUELA);
-
-  // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-  // Tabla de salones -> GET /salones
-  const [salones, setSalones] = useState(MOCK_SALONES);
-
-  // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-  // Series del día por salón { [salonId]: [{ h, fuera, dentro }] } -> GET /lecturas?salon={id}&fecha=hoy
-  // Al conectar: arrancar en {} y llenar con el useEffect de `seleccionado` de abajo.
-  const [lecturas, setLecturas] = useState(MOCK_LECTURAS);
-
-  // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-  // Pronóstico de mañana -> GET /pronostico/manana
-  const [pronostico, setPronostico] = useState(MOCK_PRONOSTICO);
-
   // Planes de acción: el director solo ve cuántos hay por salón, nunca el detalle.
   const planes = usePlanes();
   const conPlan = (id) => planes.filter((p) => p.salonId === id).length;
 
-  // Estado de la interfaz (no es mock): salón elegido en la tabla y envío del aviso.
+  // Estado de la interfaz (no es mock): salón elegido en la tabla.
   const [seleccionado, setSeleccionado] = useState("3A");
 
-  // Aviso a familias con la API (POST /alertas/enviar; el bot lo reparte). Sin API, se simula.
+  // Con API: escuela (/escuelas/miravalle), salones (/salones), pronóstico (/pronostico/manana) y la
+  // serie del salón elegido (/lecturas?salon=…&fecha=hoy), cada minuto. Sin API: datos simulados de demo.js.
   const modoApi = useConexionApi(apiAvisos);
+  const { escuela, salones, pronostico, lecturas, origen } = useTableroDatos(modoApi, seleccionado);
+
+  // Aviso a familias con la API (POST /alertas/enviar; el bot lo reparte). Sin API, se simula.
   const { envio, enviar } = useEnvioAviso(apiAvisos, modoApi);
-
-  // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-  // Al conectar: cambien los useState de arriba a useState(null) o [] y descomenten esto.
-  useEffect(() => {
-    // const get = (ruta) => fetch(`${API_URL}${ruta}`).then((r) => r.json());
-    // get("/escuelas/miravalle").then(setEscuela);
-    // get("/salones").then(setSalones);
-    // get("/pronostico/manana").then(setPronostico);
-  }, []);
-
-  // TODO: CONECTAR A LA API - REEMPLAZAR MOCK DATA AQUÍ
-  // Pide la serie del salón seleccionado si todavía no la tenemos.
-  useEffect(() => {
-    // if (lecturas[seleccionado]) return;
-    // fetch(`${API_URL}/lecturas?salon=${seleccionado}&fecha=hoy`).then((r) => r.json())
-    //   .then((serie) => setLecturas((l) => ({ ...l, [seleccionado]: serie })));
-  }, [seleccionado]);
-
   // Sin mensaje: la API usa su texto sugerido según el pronóstico de mañana.
   const enviarAviso = () => enviar();
 
-  // Derivados de los datos (no son mock: se calculan de lo que mande /salones)
-  const alertas = salones.filter((s) => s.proteccion < PROTECCION_MINIMA);
+  // Derivados de los datos (se calculan de lo que mande /salones). Sin dato de protección no hay alerta.
+  const alertas = salones.filter((s) => s.proteccion != null && s.proteccion < PROTECCION_MINIMA);
   const salon = salones.find((s) => s.id === seleccionado) ?? salones[0];
   const serie = lecturas[salon?.id] ?? [];
   const sem = SEMAFORO[pronostico.semaforo] ?? SEMAFORO.amarillo;
+  // La API avisa que un pronóstico desactualizado no debe mandarse a las familias.
+  const desactualizado = Boolean(pronostico.desactualizado);
 
   return (
     <main className="rg-app">
-      <div className="rg-demo-note">Demo con datos simulados. En la versión final se conecta a los sensores y a la API.</div>
+      <NotaDatos origen={origen} />
 
       <header className="rg-dir">
         <div className="rg-dir__brand">
@@ -190,7 +163,9 @@ export default function Tablero() {
         </div>
         <div className={`rg-dir__today rg-aq-bg--${SEMAFORO[escuela.semaforoHoy]?.id}`}>
           <small>Semáforo de hoy</small>
-          <Semaforo color={escuela.semaforoHoy} pm={escuela.pm25Hoy} big />
+          {escuela.semaforoHoy || escuela.pm25Hoy != null
+            ? <Semaforo color={escuela.semaforoHoy} pm={escuela.pm25Hoy} big />
+            : <strong>Sin dato de hoy</strong>}
           <span className="rg-muted">PM2.5 fuera en µg/m³ · {escuela.estacion} · {escuela.actualizado}</span>
         </div>
       </header>
@@ -206,7 +181,7 @@ export default function Tablero() {
               <tbody>
                 {salones.map((s) => {
                   const activo = s.id === salon?.id;
-                  const nivelBarra = s.proteccion >= PROTECCION_BUENA ? "good" : "ok";
+                  const nivelBarra = (s.proteccion ?? 0) >= PROTECCION_BUENA ? "good" : "ok";
                   return (
                     <tr key={s.id} className={activo ? "is-selected" : ""} aria-selected={activo}
                       onClick={() => setSeleccionado(s.id)}>
@@ -216,12 +191,12 @@ export default function Tablero() {
                       </td>
                       <td>
                         <div className={`rg-bar rg-bar--${nivelBarra}`}>
-                          <span style={{ width: `${Math.max(s.proteccion, 0)}%` }} />
+                          <span style={{ width: `${Math.max(s.proteccion ?? 0, 0)}%` }} />
                         </div>
                       </td>
-                      <td>{s.fuera}</td>
+                      <td>{s.fuera ?? "—"}</td>
                       <td><Pm valor={s.dentro} /></td>
-                      <td>{s.proteccion} %</td>
+                      <td>{s.proteccion != null ? `${s.proteccion} %` : "—"}</td>
                       <td>
                         <span className="rg-asma" title="Alumnos con asma (solo el número)">
                           <IconoPulmones />{s.asma}
@@ -267,13 +242,20 @@ export default function Tablero() {
 
           <section className={`rg-panel rg-aq-bg--${sem.id}`}>
             <p className="rg-panel__title rg-eyebrow">Pronóstico de {pronostico.dia.toLowerCase()}</p>
-            <p className={`rg-forecast rg-forecast--${sem.id}`}>{sem.nombre} · PM2.5 {pronostico.pm25}</p>
+            <p className={`rg-forecast rg-forecast--${sem.id}`}>{sem.nombre} · PM2.5 {pronostico.pm25 ?? "—"}</p>
             <p>
-              <strong>Recomendación:</strong> {pronostico.recomendacion}; avisar a {pronostico.familiasAviso} familias
+              <strong>Recomendación:</strong> {String(pronostico.recomendacion ?? "").replace(/\.\s*$/, "")}; avisar a {pronostico.familiasAviso} familias
               de alumnos con asma.
             </p>
+            {desactualizado && (
+              <p className="rg-muted">El pronóstico está desactualizado: no se recomienda avisar a las familias.</p>
+            )}
+            {!desactualizado && pronostico.simulado && (
+              <p className="rg-muted">Pronóstico hecho con lecturas simuladas.</p>
+            )}
             <button type="button" className="rg-pill rg-pill--primary rg-full rg-tap"
-              onClick={enviarAviso} disabled={modoApi === "cargando" || !["listo", "error"].includes(envio.estado)}>
+              onClick={enviarAviso}
+              disabled={desactualizado || modoApi === "cargando" || !["listo", "error"].includes(envio.estado)}>
               {["enviando", "en-cola"].includes(envio.estado) ? "Enviando…"
                 : envio.estado === "enviado" ? "Aviso enviado"
                   : envio.estado === "error" ? "Reintentar envío" : "Enviar aviso a familias"}

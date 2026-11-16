@@ -11,7 +11,9 @@ export const apiAvisos = crearClienteAvisos(API_URL);
 const REVISAR_CADA_MS = 4000;
 const ESPERA_MAXIMA_MS = 120000;
 
-const horaActual = () => new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
+// Hora en formato 24 h ("10:42"), sin "a.m./p.m.".
+export const horaActual = () =>
+  new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: false });
 
 /** "cargando" | "api" | "local". Una sola consulta al abrir la pantalla. */
 export function useConexionApi(api) {

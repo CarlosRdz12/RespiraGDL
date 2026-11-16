@@ -9,6 +9,9 @@ const leer = (clave, defecto) => {
 const guardar = (clave, valor) => {
   try { localStorage.setItem(clave, valor); } catch { /* sin almacenamiento: no pasa nada */ }
 };
+const borrar = (clave) => {
+  try { localStorage.removeItem(clave); } catch { /* sin almacenamiento: no pasa nada */ }
+};
 
 // Tarjeta pequeña con el resumen del aviso. Al hacer clic se abre una ventana modal para
 // editar el mensaje y enviarlo en el momento, y para programar el aviso diario (hora y nota).
@@ -20,8 +23,12 @@ const guardar = (clave, valor) => {
 //   Hora y nota    -> GET/PUT /alertas/programacion. La nota es `mensaje` en la API: el bot la
 //                     agrega debajo del pronóstico de cada mañana (no reemplaza el pronóstico).
 export default function AvisoFamilias({ datos, modo }) {
-  // Borrador del mensaje para enviar ahora: solo en este navegador.
-  const [mensaje, setMensaje] = useState(() => leer("rg-aviso-mensaje", mensajePredeterminado(datos)));
+  // Borrador del mensaje para enviar ahora: solo en este navegador. Mientras nadie lo edite, sigue
+  // al pronóstico (p. ej. cuando llegan los datos de la API después de los simulados).
+  const [propio, setPropio] = useState(() => leer("rg-aviso-mensaje", null) !== null);
+  const [mensaje, setMensaje] = useState(() => leer("rg-aviso-mensaje", null) ?? mensajePredeterminado(datos));
+  const predeterminado = mensajePredeterminado(datos);
+  useEffect(() => { if (!propio) setMensaje(predeterminado); }, [propio, predeterminado]);
 
   // Programación del aviso diario. `prog` dice de dónde sale: "cargando" | "api" | "local".
   const [prog, setProg] = useState("cargando");
@@ -64,10 +71,17 @@ export default function AvisoFamilias({ datos, modo }) {
   const terminado = ["enviado", "error", "sin-confirmar"].includes(envio.estado);
   const editar = (texto) => {
     setMensaje(texto);
+    setPropio(true);
     guardar("rg-aviso-mensaje", texto);
     if (terminado) reiniciar();
   };
-  const usarPredeterminado = () => editar(mensajePredeterminado(datos));
+  // Vuelve al predeterminado y lo deja seguir al pronóstico otra vez.
+  const usarPredeterminado = () => {
+    setPropio(false);
+    borrar("rg-aviso-mensaje");
+    setMensaje(predeterminado);
+    if (terminado) reiniciar();
+  };
 
   // El PUT reemplaza hora y nota juntas: se leen las de la API justo antes para no pisar un cambio
   // hecho desde otro lado (p. ej. /hora en el bot).

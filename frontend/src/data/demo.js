@@ -1,8 +1,9 @@
 // =====================================================================
 // DATOS SIMULADOS PARA LA DEMO
-// Todo lo que lleva "TODO: CONECTAR A LA API" se borra cuando la API esté arriba.
-// Cada página ya trae el useEffect con el fetch comentado: descoméntenlo y
-// borren el bloque mock correspondiente de este archivo.
+// El tablero y la vista de la maestra ya piden sus datos a la API (src/data/useDatos.js).
+// Los bloques MOCK_* de abajo quedan como RESPALDO: se muestran cuando no hay API
+// (p. ej. en GitHub Pages) y la pantalla lo dice. Los "TODO: CONECTAR A LA API" que siguen
+// marcan qué ruta reemplaza a cada bloque.
 // =====================================================================
 
 // URL base de la API. Se configura con VITE_API_URL en frontend/.env.local
@@ -129,6 +130,7 @@ export const MOCK_MAESTRA = {
   tareas: [
     { id: "recreo", texto: "Recreo adentro", hecho: false },
     { id: "filtro", texto: "Filtro encendido y puerta cerrada", hecho: false },
+    { id: "inhalador", texto: "Preguntar quién trae inhalador", hecho: false },
   ],
 };
 // --- FIN MOCK MAESTRA ---
